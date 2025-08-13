@@ -1,0 +1,21 @@
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import compression from 'compression';
+import routes from './routes';
+
+const app = express();
+app.use(helmet());
+app.use(cors({ origin: true, credentials: true }));
+app.use(compression());
+app.use(express.json({ limit: '1mb' }));
+
+app.use('/v1', routes);
+
+// fallback error handler
+app.use((err: any, _req: any, res: any, _next: any) => {
+  console.error(err);
+  res.status(500).json({ error: 'ServerError' });
+});
+
+export default app;
