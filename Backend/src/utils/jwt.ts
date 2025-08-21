@@ -4,7 +4,7 @@ import { env } from '../config/env';
 type JWTPayload = { sub: string };
 
 export function signAccessToken(userId: string) {
-  return jwt.sign({ sub: userId } as JWTPayload, env.JWT_SECRET, { expiresIn: '15m' });
+  return jwt.sign({ sub: userId } as JWTPayload, env.JWT_SECRET, { expiresIn: '30m' });
 }
 export function signRefreshToken(userId: string) {
   return jwt.sign({ sub: userId } as JWTPayload, env.JWT_REFRESH_SECRET, { expiresIn: '30d' });
