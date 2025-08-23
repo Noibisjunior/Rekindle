@@ -1,5 +1,5 @@
 import { Queue } from "bullmq";
-import { redisConnection } from "../config/redis";
+import { redisConnection } from "../../config/redis";
 
 export const REMINDER_QUEUE = "reminders";
 
@@ -12,4 +12,3 @@ export const reminderQueue = new Queue(REMINDER_QUEUE, {
     removeOnFail: 50,
   },
 });
- 

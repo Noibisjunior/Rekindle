@@ -1,11 +1,13 @@
 {
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "worker": "ts-node-dev --respawn --transpile-only src/jobs/reminderWorker.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "jest --runInBand",
     "lint": "eslint . --ext .ts",
-    "format": "prettier -w ."
+    "format": "prettier -w .",
+      "start:worker": "node dist/jobs/reminderWorker.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -42,6 +44,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.2.1",
+    "@types/nodemailer": "^7.0.1",
     "@types/qrcode": "^1.5.5",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.39.0",
