@@ -7,13 +7,14 @@
     "test": "jest --runInBand",
     "lint": "eslint . --ext .ts",
     "format": "prettier -w .",
-      "start:worker": "node dist/jobs/reminderWorker.ts"
+    "start:worker": "node dist/jobs/reminderWorker.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bullmq": "^5.56.10",
     "cloudinary": "^2.7.0",
     "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.1",
@@ -37,6 +38,7 @@
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/helmet": "^0.0.48",

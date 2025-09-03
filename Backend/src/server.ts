@@ -6,5 +6,5 @@ import { env } from './config/env';
   await connectDB();
   app.listen(Number(env.PORT), () => {
     console.log(`API running on http://localhost:${env.PORT}`);
-  });
+    });
 })();

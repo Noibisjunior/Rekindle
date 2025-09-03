@@ -5,12 +5,26 @@ import cloudinary from "../../config/cloudinary";
 
 export async function signup(req: Request, res: Response) {
   try {
-    const { email, password, name } = req.body;
-    const tokens = await svc.signupLocal(email, password, name);
-    return res.status(201).json(tokens);
+    const { email, password, confirmPassword } = req.body;
+    const tokens = await svc.signupLocal(email, password, confirmPassword);
+
+      res.cookie("accessToken", tokens.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // HTTPS in prod
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000, // 15 min
+    });
+    res.cookie("refreshToken", tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    return res.status(201).json({ user: { email} });
   } catch (e: any) {
     if (e.message === 'EmailInUse') return res.status(409).json({ error: 'EmailInUse' });
-    return res.status(500).json({ error: 'ServerError1' });
+    return res.status(500).json({ error: 'ServerError' });
   }
 }
 
