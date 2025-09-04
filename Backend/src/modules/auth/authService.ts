@@ -3,6 +3,8 @@ import { hashPassword, verifyPassword } from '../../utils/crypto';
 import { signAccessToken, signRefreshToken } from '../../utils/jwt';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { env } from '../../config/env';
+import { sendOtp } from "./otpService";
+
 
 const googleClient = env.GOOGLE_CLIENT_ID ? new OAuth2Client(env.GOOGLE_CLIENT_ID) : null;
 
@@ -10,8 +12,8 @@ export async function signupLocal(email: string, password: string, name?: string
   const existing = await User.findOne({ email });
   if (existing) throw new Error('EmailInUse');
   const passwordHash = await hashPassword(password);
-  const user = await User.create({ email, passwordHash, name });
-  return issueTokens(user.id);
+  const user = await User.create({ email, passwordHash, name, isVerified: false });
+  await sendOtp(email); // send OTP for email verification
 }
 
 export async function loginLocal(email: string, password: string) {

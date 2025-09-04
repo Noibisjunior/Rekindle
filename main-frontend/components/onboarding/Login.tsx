@@ -172,9 +172,12 @@ export default function Login() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <button className="text-sm text-primary hover:underline">
-                  Forgot password?
-                </button>
+                 <button
+                onClick={() => navigate("/forgot-password")}
+                className="text-primary hover:underline font-medium"
+              >
+                forgot password?
+              </button>
               </div>
               <div className="relative">
                 <Input

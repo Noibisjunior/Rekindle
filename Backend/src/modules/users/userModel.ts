@@ -5,6 +5,7 @@ export interface IUser {
   email: string;
   passwordHash?: string;
   googleId?: string;
+  isVerified: boolean;
 
   profile: {
     fullName: string;
@@ -59,6 +60,7 @@ const userSchema = new Schema<IUser>(
   {
     email: { type: String, required: true, unique: true, index: true },
     passwordHash: { type: String },
+    isVerified: { type: Boolean, default: false },
     googleId: { type: String },
     profile: { type: profileSchema, default: {} },
   },

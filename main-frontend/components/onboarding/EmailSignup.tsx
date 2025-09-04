@@ -71,7 +71,6 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
-          name: formData.email.split("@")[0],
         }),
         credentials: "include",
       });
@@ -79,7 +78,7 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Signup failed");
 
-      navigate("/profile");
+      navigate("/verify-email", { state: { email: formData.email } });
     } catch (err: any) {
       setErrors({ api: err.message });
     } finally {
