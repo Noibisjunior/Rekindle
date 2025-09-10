@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Separator } from "../ui/separator";
 import { ArrowLeft, LogIn, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+const API_URL = import.meta.env.VITE_API_URL;
 
 declare global {
   interface Window {
@@ -46,7 +47,7 @@ export default function Login() {
     setIsLoading(true);
     setErrors({});
     try {
-      const res = await fetch("http://localhost:4000/v1/auth/login", {
+      const res = await fetch("/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // cookies

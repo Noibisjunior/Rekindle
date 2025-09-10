@@ -65,7 +65,7 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
     setErrors({});
 
     try {
-      const res = await fetch("http://localhost:4000/v1/auth/signup", {
+      const res = await fetch("v1/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -112,7 +112,8 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
 
       google.accounts.id.renderButton(
         document.getElementById("google-btn"),
-        { theme: "outline", size: "large", width: "100%" }
+        { theme: "outline", size: "large", width: "100%", text: "signup_with"
+ }
       );
     }
   }, []);
@@ -153,7 +154,6 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
 
           {/* Google Sign Up */}
           <div id="google-btn" className="w-full flex justify-center" />
-
           {/* Divider */}
           <div className="relative mt-4">
             <Separator />

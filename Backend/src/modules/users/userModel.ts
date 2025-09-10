@@ -5,7 +5,11 @@ export interface IUser {
   email: string;
   passwordHash?: string;
   googleId?: string;
-  isVerified: boolean;
+  isVerified: boolean; 
+  qr?: {
+    code?: string;
+    url?: string;
+  };
 
   profile: {
     fullName: string;

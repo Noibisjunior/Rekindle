@@ -1,17 +1,17 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      "@": new URL('./', import.meta.url).pathname,
+  server: {
+    host: "0.0.0.0", // allow LAN + ngrok
+    port: 3000,
+    allowedHosts: true,
+    proxy: {
+      "/v1": {
+        target: "http://localhost:4000", // your backend API
+        changeOrigin: true,
+      },
     },
   },
-   
-  server: {
-    port: 3000,
-    open: true
-  }
-})
+});

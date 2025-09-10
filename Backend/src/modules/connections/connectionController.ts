@@ -4,32 +4,57 @@ import { Connection } from "./connectionModel";
 import dayjs from "dayjs";
 
 export async function connectWithCode(req: Request, res: Response) {
-  const me = (req as any).user;
-  const { code } = req.params;
+  try {
+    const me = (req as any).user;
+    const { code } = req.params;
 
-  const target = await User.findOne({ "qr.code": code });
-  if (!target) return res.status(404).json({ error: "UserNotFound" });
+    if (!code || typeof code !== "string") {
+      return res.status(400).json({ error: "InvalidCode" });
+    }
 
-  if (target._id.equals(me._id)) {
-    return res.status(400).json({ error: "CannotConnectToSelf" });
+    const target = await User.findOne({ "qr.code": code });
+    console.log("Looking up QR code:", code, "Found user:", target?._id);
+    if (!target) {
+      return res.status(404).json({ error: "UserNotFound" });
+    }
+
+    // Prevent connecting to self
+    if (target._id.equals(me._id)) {
+      return res
+        .status(400)
+        .json({ error: "You cannot connect to yourself" });
+    }
+
+    // Prevent duplicates (pending or accepted)
+    const existing = await Connection.findOne({
+      $or: [
+        { aUserId: me._id, bUserId: target._id },
+        { aUserId: target._id, bUserId: me._id },
+      ],
+    });
+
+    if (existing) {
+      return res
+        .status(400)
+        .json({ error: "Already connected or request pending" });
+    }
+
+    const conn = await Connection.create({
+      aUserId: me._id,
+      bUserId: target._id,
+      status: "pending",
+      createdAt: new Date(),
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Connection request sent",
+      connectionId: conn._id,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to connect" });
   }
-
-  const existing = await Connection.findOne({
-    $or: [
-      { aUserId: me._id, bUserId: target._id },
-      { aUserId: target._id, bUserId: me._id },
-    ],
-  });
-
-  if (existing) return res.status(400).json({ error: "AlreadyConnectedOrPending" });
-
-  const conn = await Connection.create({
-    aUserId: me._id,
-    bUserId: target._id,
-    status: "pending",
-  });
-
-  res.status(201).json(conn);
 }
 
 export async function acceptConnection(req: Request, res: Response) {
@@ -48,23 +73,49 @@ export async function acceptConnection(req: Request, res: Response) {
 }
 
 export async function listConnections(req: Request, res: Response) {
-  const me = (req as any).user;
-  const { event, tag, sort = "createdAt", limit = 20 } = req.query;
+  try {
+    const me = (req as any).user;
+    console.log("Logged-in user:", me._id, me.email, me.name);
 
-  const filter: any = {
-    $or: [{ aUserId: me._id }, { bUserId: me._id }],
-    status: "accepted",
-  };
-  if (event) filter.event = event;
-  if (tag) filter.tags = tag;
+    const conns = await Connection.find({
+      $or: [{ aUserId: me._id }, { bUserId: me._id }],
+    })
+      .populate("aUserId", "name photoUrl")
+      .populate("bUserId", "name photoUrl");
 
-  const connections = await Connection.find(filter)
-    .sort({ [sort as string]: -1 })
-    .limit(Number(limit))
-    .populate("aUserId bUserId", "profile.fullName profile.photoUrl");
+    console.log("Found connections:", conns.length);
 
-  res.json(connections);
+    const result = conns.map((c) => {
+      const aUser = c.aUserId as any;
+      const bUser = c.bUserId as any;
+
+      const isSender = aUser._id.equals(me._id);
+      const isReceiver = bUser._id.equals(me._id);
+      const other = isSender ? bUser : aUser;
+
+      return {
+        _id: c._id.toString(),
+        status: c.status,
+        createdAt: c.createdAt,
+        profile: {
+          id: other._id.toString(),
+          name: other.name || "Unknown User",
+          photoUrl: other.photoUrl || null,
+        },
+        aUserId: aUser._id.toString(),
+        bUserId: bUser._id.toString(),
+        isSender,
+        isReceiver,
+      };
+    });
+
+    res.json(result);
+  } catch (err) {
+    console.error("Error listing connections:", err);
+    res.status(500).json({ error: "Failed to list connections" });
+  }
 }
+
 
 
 export async function getStats(req: Request, res: Response) {
@@ -101,4 +152,31 @@ export async function getStats(req: Request, res: Response) {
   });
 
   res.json({ total, thisWeek, thisMonth, pending });
+}
+
+
+export async function rejectConnection(req: Request, res: Response) {
+  try {
+    const me = (req as any).user;
+    const { id } = req.params;
+
+    const conn = await Connection.findById(id);
+    if (!conn) return res.status(404).json({ error: "Connection not found" });
+
+    // Only involved users can reject
+    if (
+      !conn.aUserId.equals(me._id) &&
+      !conn.bUserId.equals(me._id)
+    ) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    // Delete the connection (or mark rejected)
+    await conn.deleteOne();
+
+    return res.json({ success: true, message: "Connection rejected" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to reject connection" });
+  }
 }
