@@ -4,12 +4,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Card, CardContent } from "../ui/card";
 import { QrCode, Settings, User } from "lucide-react";
 
+interface User{
+    name?: string;
+    photoUrl?: string;
+    linkedin?: string;
+    tags?: string[];
+  };
+
+interface UserProfile {
+  id: string;
+  name: string;
+  photoUrl?: string | null;
+  tags?: string[];
+}
+
 interface Connection {
   _id: string;
   status: "pending" | "accepted";
   createdAt: string;
   event?: string;
-  profile: { name: string; photoUrl?: string };
+  profile: UserProfile;
 }
 
 interface ConnectionStats {
@@ -20,39 +34,41 @@ interface ConnectionStats {
 }
 
 interface HomeScreenProps {
-  user: { name: string; photo?: string } | null;
-  onScanQR: () => void;
   onViewConnections: () => void;
   onEditProfile: () => void;
 }
 
 export default function HomeScreen({
-  user,
-  onScanQR,
   onViewConnections,
   onEditProfile,
 }: HomeScreenProps) {
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<ConnectionStats | null>(null);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch stats + recent connections
+  // Fetch user + stats + recent connections
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch current user
+        const resUser = await fetch("/v1/auth/me", { credentials: "include" });
+        if (resUser.ok) {
+          const data = await resUser.json();
+          setUser(data.user);
+        }
+
+        // Fetch stats + connections in parallel
         const [resStats, resConns] = await Promise.all([
-          fetch("http://localhost:4000/v1/connections/stats", {
-            credentials: "include",
-          }),
-          fetch("http://localhost:4000/v1/connections", {
-            credentials: "include",
-          }),
+          fetch("/v1/connections/stats", { credentials: "include" }),
+          fetch("/v1/connections", { credentials: "include" }),
         ]);
 
         if (resStats.ok) setStats(await resStats.json());
         if (resConns.ok) setConnections(await resConns.json());
       } catch (err) {
-        console.error("Failed to fetch connections:", err);
+        console.error("Failed to fetch homepage data:", err);
       } finally {
         setLoading(false);
       }
@@ -69,9 +85,14 @@ export default function HomeScreen({
             {/* Avatar + Name */}
             <div className="flex items-center space-x-3 sm:space-x-4">
               <Avatar className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 border-2 border-white/20">
-                <AvatarImage src={user?.photo} />
+                <AvatarImage src={user?.photoUrl} />
                 <AvatarFallback className="bg-secondary text-secondary-foreground font-medium">
-                  {user?.name?.split(" ").map((n) => n[0]).join("") || <User />}
+                  {user?.name
+                    ? user?.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                    : <User />}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -79,7 +100,7 @@ export default function HomeScreen({
                   Welcome back!
                 </h1>
                 <p className="text-white/80 text-sm sm:text-base lg:text-lg">
-                  {user?.name || "User"}
+                  {user?.name || "there"}
                 </p>
               </div>
             </div>
@@ -136,7 +157,7 @@ export default function HomeScreen({
         <Card className="bg-gradient-to-r from-secondary to-secondary/80 border-0 shadow-lg">
           <CardContent className="p-6">
             <Button
-                onClick={() => (window.location.href = "/u/:code")}
+              onClick={() => (window.location.href = "/u/:code")} 
               className="w-full h-14 sm:h-16 bg-white/20 hover:bg-white/30 border border-white/30 text-secondary-foreground"
             >
               <div className="flex items-center justify-center space-x-2 sm:space-x-3">
@@ -148,21 +169,22 @@ export default function HomeScreen({
             </Button>
           </CardContent>
         </Card>
-        <Card
-  className="border border-border/50 hover:shadow-md transition cursor-pointer"
-  onClick={() => (window.location.href = "/my-qrcode")}
->
-  <CardContent className="p-4 text-center">
-    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-      <QrCode className="w-6 h-6 sm:w-7 sm:h-7 text-secondary" />
-    </div>
-    <p className="font-medium text-base sm:text-lg">My QR</p>
-    <p className="text-xs sm:text-sm text-muted-foreground">
-      Share your profile
-    </p>
-  </CardContent>
-</Card>
 
+        {/* My QR */}
+        <Card
+          className="border border-border/50 hover:shadow-md transition cursor-pointer"
+          onClick={() => (window.location.href = "/my-qrcode")}
+        >
+          <CardContent className="p-4 text-center">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <QrCode className="w-6 h-6 sm:w-7 sm:h-7 text-secondary" />
+            </div>
+            <p className="font-medium text-base sm:text-lg">My QR</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Share your profile
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
         <Card>
@@ -184,28 +206,37 @@ export default function HomeScreen({
                 ))}
               </div>
             ) : connections.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No recent connections yet.</p>
+              <p className="text-muted-foreground text-sm">
+                No recent connections yet.
+              </p>
             ) : (
               <div className="space-y-4">
                 {connections.slice(0, 5).map((c) => (
-                  <div key={c._id} className="flex items-center space-x-3">
-                    <Avatar className="w-10 h-10 sm:w-12 sm:h-12">
-                      <AvatarImage src={c.profile?.photoUrl} />
-                      <AvatarFallback>
-                        {c.profile?.name?.split(" ").map((n) => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm sm:text-base">
-                        Connected with {c.profile?.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(c.createdAt).toLocaleDateString()} •{" "}
-                        {c.event || "Event"}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+  <div key={c._id} className="flex items-center space-x-3">
+    <Avatar className="w-10 h-10 sm:w-12 sm:h-12">
+      <AvatarImage src={c.profile?.photoUrl || undefined} />
+      <AvatarFallback>
+        {c.profile?.name
+          ?.split(" ")
+          .map((n) => n[0])
+          .join("")}
+      </AvatarFallback>
+    </Avatar>
+    <div className="flex-1">
+      <p className="font-medium text-sm sm:text-base">
+        Connected with <span className="font-semibold">{c.profile?.name}</span>
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {new Date(c.createdAt).toLocaleDateString()}
+      </p>
+      <p className="text-xs text-muted-foreground">
+  {c.profile?.tags?.join(", ")}
+</p>
+
+    </div>
+  </div>
+))}
+
               </div>
             )}
 
@@ -224,3 +255,4 @@ export default function HomeScreen({
     </div>
   );
 }
+
