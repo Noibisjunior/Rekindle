@@ -10,7 +10,7 @@ const googleClient = env.GOOGLE_CLIENT_ID
   : null;
 
 /**
- * Signup with email + password → creates user and sends OTP
+ * Signup with email, password and creates user and sends OTP
  */
 export async function signupLocal(email: string, password: string, name?: string) {
   const existing = await User.findOne({ email });
@@ -31,7 +31,7 @@ export async function signupLocal(email: string, password: string, name?: string
 }
 
 /**
- * Login with email + password
+ * Login with email and password
  * - blocks if user not verified
  */
 export async function loginLocal(email: string, password: string) {

@@ -17,7 +17,7 @@ const reminderSchema = new Schema<IReminder>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     connectionId: { type: Schema.Types.ObjectId, ref: "Connection", required: true },
     remindAt: { type: Date, required: true },
-    channel: { type: String, enum: ["push", "email"], default: "push" },
+    channel: { type: String, enum: ["push", "email"], default: "email" },
     message: { type: String, required: true },
     sent: { type: Boolean, default: false },
   },

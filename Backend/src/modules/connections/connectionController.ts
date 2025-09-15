@@ -71,19 +71,17 @@ export async function acceptConnection(req: Request, res: Response) {
   await conn.save();
   res.json(conn);
 }
-
 export async function listConnections(req: Request, res: Response) {
   try {
     const me = (req as any).user;
-    console.log("Logged-in user:", me._id, me.email, me.name);
 
+    // Fetch connections and sort newest first
     const conns = await Connection.find({
       $or: [{ aUserId: me._id }, { bUserId: me._id }],
     })
-      .populate("aUserId", "name photoUrl")
-      .populate("bUserId", "name photoUrl");
-
-    console.log("Found connections:", conns.length);
+      .sort({ createdAt: -1 })
+      .populate("aUserId", "profile.fullName profile.photoUrl profile.linkedin profile.tags")
+      .populate("bUserId", "profile.fullName profile.photoUrl profile.linkedin profile.tags");
 
     const result = conns.map((c) => {
       const aUser = c.aUserId as any;
@@ -99,8 +97,10 @@ export async function listConnections(req: Request, res: Response) {
         createdAt: c.createdAt,
         profile: {
           id: other._id.toString(),
-          name: other.name || "Unknown User",
-          photoUrl: other.photoUrl || null,
+          name: other.profile?.fullName || "Unnamed User",
+          photoUrl: other.profile?.photoUrl || "",
+          linkedin: other.profile?.linkedin || "",
+          tags: Array.isArray(other.profile?.tags) ? other.profile.tags : [],
         },
         aUserId: aUser._id.toString(),
         bUserId: bUser._id.toString(),
@@ -117,6 +117,60 @@ export async function listConnections(req: Request, res: Response) {
 }
 
 
+export async function getConnectionById(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: "MissingConnectionId" });
+    }
+
+    const connection = await Connection.findById(id)
+      .populate("aUserId", "email profile")
+      .populate("bUserId", "email profile");
+
+    if (!connection) {
+      return res.status(404).json({ error: "ConnectionNotFound" });
+    }
+
+    const userId = (req as any).user?._id?.toString();
+    if (
+      userId &&
+      connection.aUserId._id.toString() !== userId &&
+      connection.bUserId._id.toString() !== userId
+    ) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    // Decide which user is the "other person" in this connection
+    const isA = connection.aUserId._id.toString() === userId;
+    const otherUser: any = isA ? connection.bUserId : connection.aUserId;
+
+    
+    const profile = {
+      _id: otherUser._id,
+      email: otherUser.email,
+      name: otherUser.profile?.fullName,
+      photoUrl: otherUser.profile?.photoUrl,
+      linkedin: otherUser.profile?.linkedin,
+      tags: otherUser.profile?.tags || [],
+    };
+
+    const response = {
+      _id: connection._id,
+      createdAt: connection.createdAt,
+      status: connection.status,
+      event: connection.event,
+      profile,
+    };
+
+    return res.json(response);
+  } catch (err) {
+    console.error("Error fetching connection:", err);
+    return res.status(500).json({ error: "ServerError" });
+  }
+}
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 
 export async function getStats(req: Request, res: Response) {
   const me = (req as any).user;

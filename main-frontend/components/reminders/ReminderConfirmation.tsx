@@ -1,8 +1,13 @@
-import React from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { CheckCircle, Edit, Clock } from 'lucide-react';
-import { Reminder } from '../../App';
+
+interface Reminder {
+  _id?: string;
+  connectionId: string;
+  remindAt: string;
+  message: string;
+}
 
 interface ReminderConfirmationProps {
   reminder: Reminder;
@@ -10,11 +15,13 @@ interface ReminderConfirmationProps {
   onDone: () => void;
 }
 
-export default function ReminderConfirmation({ 
-  reminder, 
-  onEdit, 
-  onDone 
+export default function ReminderConfirmation({
+  reminder,
+  onEdit,
+  onDone
 }: ReminderConfirmationProps) {
+  const scheduledDate = new Date(reminder.remindAt);
+
   const formatDateTime = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       weekday: 'long',
@@ -27,12 +34,13 @@ export default function ReminderConfirmation({
 
   const getTimeUntilReminder = () => {
     const now = new Date();
-    const timeDiff = reminder.scheduledFor.getTime() - now.getTime();
-    
+    const timeDiff = scheduledDate.getTime() - now.getTime();
+    if (timeDiff <= 0) return 'a few moments';
+
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 24) {
+
+    if (hours >= 24) {
       const days = Math.floor(hours / 24);
       return `${days} day${days > 1 ? 's' : ''}`;
     } else if (hours > 0) {
@@ -53,7 +61,7 @@ export default function ReminderConfirmation({
 
           {/* Title */}
           <h2 className="text-xl font-semibold mb-2">Reminder Set!</h2>
-          
+
           {/* Description */}
           <p className="text-muted-foreground mb-6">
             You'll be reminded in {getTimeUntilReminder()}
@@ -69,7 +77,7 @@ export default function ReminderConfirmation({
                 <div className="text-left">
                   <p className="font-medium text-sm">{reminder.message}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {formatDateTime(reminder.scheduledFor)}
+                    {formatDateTime(scheduledDate)}
                   </p>
                 </div>
               </div>
@@ -86,13 +94,9 @@ export default function ReminderConfirmation({
               Edit Reminder
             </Button>
           </div>
-
-          {/* Additional Info */}
-          <p className="text-xs text-muted-foreground mt-4">
-            You can view and manage all reminders in your profile settings
-          </p>
         </CardContent>
       </Card>
     </div>
   );
 }
+

@@ -13,6 +13,7 @@ import {
   Building,
   Github,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface UserProfile {
   name: string;
@@ -39,12 +40,15 @@ interface ConnectionDetailProps {
   loading?: boolean;
 }
 
+
+
 export default function ConnectionDetail({
   connection,
   onBack,
   onRemindMe,
   loading = false,
 }: ConnectionDetailProps) {
+  const navigate = useNavigate();
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -72,6 +76,10 @@ export default function ConnectionDetail({
       hour: "2-digit",
       minute: "2-digit",
     }).format(new Date(date));
+
+    const handleSetReminder = () => {
+      navigate("/reminder", { state: { connection } });
+    };
 
   return (
     <div className="min-h-screen bg-background">
@@ -211,7 +219,7 @@ export default function ConnectionDetail({
                 Don’t let this connection go cold. Set a reminder to follow up.
               </p>
               <Button
-                onClick={onRemindMe}
+                onClick={handleSetReminder}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
               >
                 <Bell className="w-4 h-4 mr-2" />
@@ -224,3 +232,4 @@ export default function ConnectionDetail({
     </div>
   );
 }
+

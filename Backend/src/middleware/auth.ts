@@ -12,7 +12,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
   try {
     const payload = verifyAccessToken(token);
-    const user = await User.findById(payload.sub).select("_id email name photoUrl");
+    const user = await User.findById(payload.sub).select("email profile");
     if (!user) {
       return res.status(401).json({ error: "InvalidToken" });
     }

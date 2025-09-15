@@ -93,8 +93,20 @@ export async function google(req: Request, res: Response) {
  * Get logged-in user info
  */
 export async function me(req: Request, res: Response) {
-  const user = (req as any).user;
-  return res.json({ user });
+  const user = await User.findById((req as any).user._id)
+    .select("email profile");
+  if (!user) return res.status(404).json({ error: "NotFound" });
+
+  res.json({
+    user: {
+      id: user._id,
+      email: user.email,
+      name: user.profile?.fullName ?? null,
+      photoUrl: user.profile?.photoUrl ?? null,
+      linkedin: user.profile?.socials?.linkedin ?? null,
+      tags: user.profile?.tags ?? [],
+    }
+  });
 }
 
 /**

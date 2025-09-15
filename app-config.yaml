@@ -1,0 +1,18 @@
+app_name: Rekindle
+version: 1.0.0
+
+team_members:
+  - name: Alice Johnson
+    role: Project Manager
+    contact: alice.johnson@example.com
+
+environment:
+  development:
+    database_url: postgres://dev_user:dev_pass@localhost/dev_db
+    api_key: dev_api_key_123
+  staging:
+    database_url: postgres://stage_user:stage_pass@staging-server/stage_db
+    api_key: stage_api_key_456
+  production:
+    database_url: postgres://prod_user:prod_pass@prod-server/prod_db
+    api_key: prod_api_key_789
