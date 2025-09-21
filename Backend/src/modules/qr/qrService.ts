@@ -2,17 +2,17 @@ import QRCode from "qrcode";
 import { nanoid } from "nanoid";
 import { User } from "../users/userModel";
 import { connectDB } from '../../config/db';
-import { env } from './config/env';
+import { env } from "../../config/env";
 
 
 // async function resetQRCodes() {
-//   await connectDB(process.env.MONGO_URI);
+//   await connectDB(env.MONGO_URI);
 
 //   const users = await User.find({});
 //   for (const user of users) {
 //     if (!user.qr?.code) {
 //       const code = nanoid(10);
-//       const url = `${process.env.PUBLIC_APP_URL}/u/${code}`;
+//       const url = `${env.PUBLIC_APP_URL}/u/${code}`;
 //       user.qr = { code, url };
 //       await user.save();
 //       console.log(`Assigned QR to user ${user.email}: ${code}`);
@@ -37,7 +37,7 @@ export async function provisionUserQr(userId: string) {
 
   // Otherwise generate a new one once
   const code = nanoid(10);
-  const url = `${process.env.PUBLIC_APP_URL}/u/${code}`;
+  const url = `${env.PUBLIC_APP_URL}/u/${code}`;
   const png = await QRCode.toDataURL(url, { margin: 0, width: 256 });
 
   await User.findByIdAndUpdate(userId, {
@@ -46,4 +46,3 @@ export async function provisionUserQr(userId: string) {
 
   return { code, url, png };
 }
-
