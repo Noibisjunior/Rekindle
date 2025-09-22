@@ -14,6 +14,7 @@ app.use(express.json({ limit: "1mb" }));
 
 const allowedOrigins = [
   "https://frontend-service-8sxa.onrender.com",
+  "https://rekindle-kappa.vercel.app"
   "http://localhost:3000" 
 ];
 
