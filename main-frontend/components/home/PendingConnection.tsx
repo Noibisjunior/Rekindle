@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -115,7 +115,6 @@ export default function PendingConnection({
               </Avatar>
               <div className="text-left">
                 <p className="font-medium">{profile.name}</p>
-                <p className="text-sm text-muted-foreground">{profile.email}</p>
               </div>
             </div>
 

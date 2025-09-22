@@ -25,7 +25,7 @@ export interface UserProfile {
 }
 
 function App() {
-  const [user, setUser] = useState<UserProfile | null>({
+  const [user] = useState<UserProfile | null>({
     id: "1",
     name: "John Doe",
     photo: undefined,
@@ -80,8 +80,7 @@ function SignupWrapper() {
 }
 
 function ProfileSetupWrapper() {
-  const navigate = useNavigate();
-  return <ProfileSetup onComplete={() => navigate("/home")} />;
+  return <ProfileSetup />;
 }
 
 function ReminderSetupWrapper() {

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Label } from "../ui/label";
-import { Switch } from "../ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ArrowLeft, Clock } from "lucide-react";
+import { API_BASE } from "../../src/lib/api";
 
 interface ReminderSetupProps {
   connection: {
@@ -65,14 +65,14 @@ export default function ReminderSetup({
 
     setLoading(true);
     try {
-      const res = await fetch("/v1/reminders", {
+      const res = await fetch(`${API_BASE}/v1/reminders`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           connectionId: connection._id,
           remindAt: scheduledTime,
-          channel: "email", // you can toggle push/email later if needed
+          channel: "email", 
           message: `Follow up with ${connection.profile.name}`,
         }),
       });

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from '../ui/button';
 import { Users, QrCode, Bell } from 'lucide-react';
 

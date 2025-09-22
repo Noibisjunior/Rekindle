@@ -6,6 +6,7 @@ import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ArrowLeft, Camera, User } from "lucide-react";
+import { API_BASE } from "../../src/lib/api";
 
 const AVAILABLE_TAGS = [
   "Software Engineer",
@@ -20,7 +21,7 @@ const AVAILABLE_TAGS = [
   "Other",
 ];
 
-export default function ProfileSetup(onComplete: { onComplete: () => void }) {
+export default function ProfileSetup() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
@@ -56,7 +57,7 @@ export default function ProfileSetup(onComplete: { onComplete: () => void }) {
     setError("");
 
     try {
-      const res = await fetch("/v1/auth/me", {
+      const res = await fetch(`${API_BASE}/v1/auth/me`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

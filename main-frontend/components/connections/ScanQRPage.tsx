@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../../src/lib/api";
 
 export default function ScanQR() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function ScanQR() {
               }
 
 
-          const res = await fetch(`/v1/connect/${code}`, {
+          const res = await fetch(`${API_BASE}/v1/connect/${code}`, {
             method: "POST",
             credentials: "include",
           });

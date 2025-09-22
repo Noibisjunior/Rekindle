@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-
+import { API_BASE } from "../../src/lib/api";
 
 interface UserProfile {
   id: string;
@@ -9,7 +9,6 @@ interface UserProfile {
   photoUrl?: string | null;
   tags?: string[];
 }
-
 
 interface Connection {
   _id: string;
@@ -26,14 +25,14 @@ interface ConnectionsPageProps {
   user: { id: string; name: string; photo?: string } | null;
 }
 
-export default function ConnectionsPage({ user }: ConnectionsPageProps) {
+export default function ConnectionsPage({ }: ConnectionsPageProps) {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchConnections = async () => {
       try {
-        const res = await fetch("/v1/connections", {
+        const res = await fetch(`${API_BASE}/v1/connections`, {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Failed to load connections");
@@ -50,7 +49,7 @@ export default function ConnectionsPage({ user }: ConnectionsPageProps) {
 
   const acceptConnection = async (id: string) => {
     try {
-      const res = await fetch(`/v1/connections/${id}/accept`, {
+      const res = await fetch(`${API_BASE}/v1/connections/${id}/accept`, {
         method: "POST",
         credentials: "include",
       });
@@ -66,7 +65,7 @@ export default function ConnectionsPage({ user }: ConnectionsPageProps) {
 
   const rejectConnection = async (id: string) => {
     try {
-      const res = await fetch(`/v1/connections/${id}/reject`, {
+      const res = await fetch(`${API_BASE}/v1/connections/${id}/reject`, {
         method: "POST",
         credentials: "include",
       });
@@ -89,72 +88,71 @@ export default function ConnectionsPage({ user }: ConnectionsPageProps) {
       ) : (
         <div className="space-y-4">
           {connections.map((c) => (
-  <div
-    key={c._id}
-    className="flex items-center justify-between bg-white dark:bg-card rounded-xl shadow-sm p-4"
-  >
-    <div className="flex items-center space-x-3">
-      <Avatar className="w-12 h-12">
-        {c.profile.photoUrl ? (
-          <AvatarImage src={c.profile.photoUrl} />
-        ) : (
-          <AvatarFallback>
-            {c.profile.name?.split(" ").map((n) => n[0]).join("")}
-          </AvatarFallback>
-        )}
-      </Avatar>
-      <div>
-        <p className="font-medium">{c.profile.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {c.profile?.tags}
-          </p>
-        <p className="text-xs text-muted-foreground">
-          Joined on {new Date(c.createdAt).toLocaleDateString()}
-        </p>
-      </div>
-    </div>
+            <div
+              key={c._id}
+              className="flex items-center justify-between bg-white dark:bg-card rounded-xl shadow-sm p-4"
+            >
+              <div className="flex items-center space-x-3">
+                <Avatar className="w-12 h-12">
+                  {c.profile.photoUrl ? (
+                    <AvatarImage src={c.profile.photoUrl} />
+                  ) : (
+                    <AvatarFallback>
+                      {c.profile.name?.split(" ").map((n) => n[0]).join("")}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div>
+                  <p className="font-medium">{c.profile.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {c.profile?.tags}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Joined on {new Date(c.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
 
-    {/* Status / Actions */}
-    {c.status === "pending" ? (
-      c.isSender ? (
-        <span className="text-sm text-muted-foreground">Request Sent</span>
-      ) : c.isReceiver ? (
-        <div className="flex space-x-2">
-          <Button
-            size="sm"
-            onClick={() => acceptConnection(c._id)}
-            className="bg-green-600 text-white hover:bg-green-700"
-          >
-            Accept
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => rejectConnection(c._id)}
-            className="hover:bg-red-50 text-red-600"
-          >
-            Reject
-          </Button>
-        </div>
-      ) : null
-    ) : c.isReceiver ? (
-      <>
-      <span className="text-sm text-green-600">Connection Accepted</span>
-      <Button onClick={() => (window.location.href = `/connections/${c._id}`)} 
-      size="sm" variant="outline"> View Details </Button>
-    </>) : (
-      <>
-      <span className="text-sm text-green-600">Connected</span>
-      <Button onClick={() => (window.location.href = `/connections/${c._id}`)}
-      size="sm" variant="outline"> View Details </Button>
-</>)}
-  </div>
-))}
-
-
+              {/* Status / Actions */}
+              {c.status === "pending" ? (
+                c.isSender ? (
+                  <span className="text-sm text-muted-foreground">Request Sent</span>
+                ) : c.isReceiver ? (
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      onClick={() => acceptConnection(c._id)}
+                      className="bg-green-600 text-white hover:bg-green-700"
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => rejectConnection(c._id)}
+                      className="hover:bg-red-50 text-red-600"
+                    >
+                      Reject
+                    </Button>
+                  </div>
+                ) : null
+              ) : c.isReceiver ? (
+                <>
+                  <span className="text-sm text-green-600">Connection Accepted</span>
+                  <Button onClick={() => (window.location.href = `/connections/${c._id}`)} 
+                  size="sm" variant="outline"> View Details </Button>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm text-green-600">Connected</span>
+                  <Button onClick={() => (window.location.href = `/connections/${c._id}`)}
+                  size="sm" variant="outline"> View Details </Button>
+                </>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 }
-

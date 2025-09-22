@@ -5,6 +5,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Alert, AlertDescription } from "../ui/alert";
 import { ArrowLeft, Lock } from "lucide-react";
+import { API_BASE } from "../../src/lib/api";
 
 export default function ResetPassword() {
   const location = useLocation();
@@ -41,7 +42,7 @@ export default function ResetPassword() {
     setMessage("");
 
     try {
-      const res = await fetch("/v1/auth/reset-password", {
+      const res = await fetch(`${API_BASE}/v1/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Alert, AlertDescription } from "../ui/alert";
-import { ArrowLeft, KeyRound, Mail } from "lucide-react";
+import { ArrowLeft, KeyRound } from "lucide-react";
+import { API_BASE } from "../../src/lib/api";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -23,7 +24,7 @@ export default function ForgotPassword() {
     setMessage("");
 
     try {
-      const res = await fetch("v1/otp/send-otp", {
+      const res = await fetch(`${API_BASE}/v1/otp/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

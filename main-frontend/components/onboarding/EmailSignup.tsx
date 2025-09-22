@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -6,8 +6,13 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Separator } from "../ui/separator";
 import { ArrowLeft, Mail, Eye, EyeOff } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import { API_BASE } from "../../src/lib/api";
 
-declare const google: any;
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
 
 interface EmailSignupProps {
   onContinue: () => void;
@@ -65,7 +70,7 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
     setErrors({});
 
     try {
-      const res = await fetch("v1/auth/signup", {
+      const res = await fetch(`${API_BASE}/v1/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -88,13 +93,13 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
 
   // --- Google Signup ---
   useEffect(() => {
-    if (google && google.accounts && google.accounts.id) {
-      google.accounts.id.initialize({
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      window.google.accounts.id.initialize({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
         callback: async (response: any) => {
           if (response.credential) {
             try {
-              const res = await fetch("http://localhost:4000/v1/auth/google", {
+              const res = await fetch(`${API_BASE}/v1/auth/google`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -110,10 +115,14 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
         },
       });
 
-      google.accounts.id.renderButton(
+      window.google.accounts.id.renderButton(
         document.getElementById("google-btn"),
-        { theme: "outline", size: "large", width: "100%", text: "signup_with"
- }
+        {
+          theme: "outline",
+          size: "large",
+          width: "100%",
+          text: "signup_with",
+        }
       );
     }
   }, []);

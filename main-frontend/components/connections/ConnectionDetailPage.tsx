@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ConnectionDetail from "./ConnectionDetail";
+import { API_BASE } from "../../src/lib/api";
 
 export default function ConnectionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -10,7 +11,7 @@ export default function ConnectionDetailPage() {
   useEffect(() => {
     const fetchConnection = async () => {
       try {
-        const res = await fetch(`/v1/connections/${id}`, {
+        const res = await fetch(`${API_BASE}v1/connections/${id}`, {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Failed to load connection");

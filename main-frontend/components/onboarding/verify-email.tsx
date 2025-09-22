@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Mail, Loader2 } from "lucide-react";
+import { API_BASE } from "../../src/lib/api";
 
 export default function VerifyEmail() {
   const location = useLocation();
@@ -24,7 +25,7 @@ export default function VerifyEmail() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/v1/auth/verify-email", {
+      const res = await fetch(`${API_BASE}/v1/auth/verify-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { Separator } from "../ui/separator";
 import { ArrowLeft, LogIn, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-const API_URL = import.meta.env.VITE_API_URL;
+import { API_BASE } from "../../src/lib/api";
 
 declare global {
   interface Window {
@@ -47,7 +47,7 @@ export default function Login() {
     setIsLoading(true);
     setErrors({});
     try {
-      const res = await fetch("/v1/auth/login", {
+      const res = await fetch(`${API_BASE}/v1/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include", // cookies
@@ -74,7 +74,7 @@ export default function Login() {
           if (response.credential) {
             setIsGoogleLoading(true);
             try {
-              const res = await fetch("http://localhost:4000/v1/auth/google", {
+              const res = await fetch(`${API_BASE}/v1/auth/google`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",

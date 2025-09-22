@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Card, CardContent } from "../ui/card";
 import { QrCode, Settings, User } from "lucide-react";
+import { API_BASE } from "../../src/lib/api";
 
 interface User {
   name?: string;
@@ -50,15 +51,15 @@ export default function HomeScreen({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resUser = await fetch("/v1/auth/me", { credentials: "include" });
+        const resUser = await fetch(`${API_BASE}/v1/auth/me`, { credentials: "include" });
         if (resUser.ok) {
           const data = await resUser.json();
           setUser(data.user);
         }
 
         const [resStats, resConns] = await Promise.all([
-          fetch("/v1/connections/stats", { credentials: "include" }),
-          fetch("/v1/connections", { credentials: "include" }),
+          fetch(`${API_BASE}/v1/connections/stats`, { credentials: "include" }),
+          fetch(`${API_BASE}/v1/connections`, { credentials: "include" }),
         ]);
 
         if (resStats.ok) setStats(await resStats.json());

@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
@@ -45,7 +44,6 @@ interface ConnectionDetailProps {
 export default function ConnectionDetail({
   connection,
   onBack,
-  onRemindMe,
   loading = false,
 }: ConnectionDetailProps) {
   const navigate = useNavigate();

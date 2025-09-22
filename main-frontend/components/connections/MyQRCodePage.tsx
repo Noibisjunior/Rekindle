@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Loader2, Copy, Check } from "lucide-react";
+import { API_BASE } from "../../src/lib/api";
 
 interface QRData {
   code: string;
@@ -18,7 +19,7 @@ export default function MyQRCodePage() {
   useEffect(() => {
     const fetchQr = async () => {
       try {
-        const res = await fetch("/v1/me/qr", {
+        const res = await fetch(`${API_BASE}/v1/me/qr`, {
           credentials: "include",
         });
 
@@ -110,4 +111,3 @@ export default function MyQRCodePage() {
     </div>
   );
 }
-
