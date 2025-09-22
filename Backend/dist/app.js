@@ -14,21 +14,12 @@ app.use((0, helmet_1.default)());
 app.use((0, cookie_parser_1.default)());
 app.use((0, compression_1.default)());
 app.use(express_1.default.json({ limit: "1mb" }));
+const allowedOrigins = [
+    "https://frontend-service-8sxa.onrender.com",
+    "http://localhost:3000"
+];
 app.use((0, cors_1.default)({
-    origin: (origin, cb) => {
-        // allow Vite dev, LAN IP, localhost, any ngrok
-        if (!origin ||
-            origin.startsWith("http://localhost:3000") ||
-            origin.startsWith("http://10.") || // any LAN IP 10.x.x.x
-            origin.startsWith("http://192.") || // for 192.168.x.x networks
-            /\.ngrok-free\.app$/.test(origin) // any ngrok URL
-        ) {
-            cb(null, true);
-        }
-        else {
-            cb(new Error(`CORS blocked: ${origin}`));
-        }
-    },
+    origin: allowedOrigins,
     credentials: true,
 }));
 //  API routes under /v1
