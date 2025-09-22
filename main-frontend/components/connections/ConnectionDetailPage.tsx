@@ -11,7 +11,7 @@ export default function ConnectionDetailPage() {
   useEffect(() => {
     const fetchConnection = async () => {
       try {
-        const res = await fetch(`${API_BASE}v1/connections/${id}`, {
+        const res = await fetch(`${API_BASE}/v1/connections/${id}`, {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Failed to load connection");
