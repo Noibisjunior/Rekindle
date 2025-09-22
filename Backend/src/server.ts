@@ -15,4 +15,3 @@ import { startReminderWorker } from "./modules/reminders/reminderWorker";
     startReminderWorker();
     console.log("⏰ Reminder worker started...");
 })();
-
