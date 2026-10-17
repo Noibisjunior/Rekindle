@@ -3,9 +3,11 @@ import { Schema, model, Types } from "mongoose";
 export interface IUser {
   _id: Types.ObjectId;
   email: string;
+  name?: string;
   passwordHash?: string;
   googleId?: string;
-  isVerified: boolean; 
+  isVerified: boolean;
+  photoUrl?: string;
   qr?: {
     code?: string;
     url?: string;
@@ -63,9 +65,15 @@ const profileSchema = new Schema<IUser["profile"]>(
 const userSchema = new Schema<IUser>(
   {
     email: { type: String, required: true, unique: true, index: true },
+    name: { type: String, trim: true, maxlength: 100 },
     passwordHash: { type: String },
     isVerified: { type: Boolean, default: false },
     googleId: { type: String },
+    photoUrl: { type: String, trim: true },
+    qr: {
+      code: { type: String, trim: true },
+      url: { type: String, trim: true },
+    },
     profile: { type: profileSchema, default: {} },
   },
   { timestamps: true }

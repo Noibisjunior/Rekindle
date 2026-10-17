@@ -9,23 +9,34 @@ const googleClient = env.GOOGLE_CLIENT_ID
   ? new OAuth2Client(env.GOOGLE_CLIENT_ID)
   : null;
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 /**
  * Signup with email, password and creates user and sends OTP
  */
 export async function signupLocal(email: string, password: string, name?: string) {
-  const existing = await User.findOne({ email });
+  const normalizedEmail = normalizeEmail(email);
+  const existing = await User.findOne({ email: normalizedEmail });
   if (existing) throw new Error("EmailInUse");
 
+  const safeName = name?.trim() || "";
   const passwordHash = await hashPassword(password);
   const user = await User.create({
-    email,
+    email: normalizedEmail,
     passwordHash,
-    name,
+    name: safeName,
+    photoUrl: undefined,
     isVerified: false,
+    profile: {
+      fullName: safeName,
+      tags: [],
+    },
   });
 
   // send OTP for email verification
-  await sendOtp(email);
+  await sendOtp(normalizedEmail);
 
   return user; // controller handles response
 }
@@ -35,7 +46,8 @@ export async function signupLocal(email: string, password: string, name?: string
  * - blocks if user not verified
  */
 export async function loginLocal(email: string, password: string) {
-  const user = await User.findOne({ email });
+  const normalizedEmail = normalizeEmail(email);
+  const user = await User.findOne({ email: normalizedEmail });
   if (!user || !user.passwordHash) throw new Error("InvalidCredentials");
 
   const ok = await verifyPassword(password, user.passwordHash);
@@ -66,12 +78,31 @@ export async function loginWithGoogleIdToken(idToken: string) {
     user = await User.create({
       email: payload.email,
       googleId: payload.sub,
-      name: payload.name,
+      name: payload.name || payload.email,
       photoUrl: payload.picture,
-      isVerified: true, // 
+      isVerified: true,
+      profile: {
+        fullName: payload.name || payload.email,
+        photoUrl: payload.picture,
+        tags: [],
+      },
     });
-  } else if (!user.isVerified) {
-    user.isVerified = true; 
+  } else {
+    const nextName = payload.name || user.name || user.profile?.fullName || user.email;
+    const nextPhoto = payload.picture || user.photoUrl || user.profile?.photoUrl;
+
+    user.name = nextName;
+    user.photoUrl = nextPhoto;
+    user.profile = {
+      ...user.profile,
+      fullName: nextName,
+      photoUrl: nextPhoto,
+      tags: user.profile?.tags ?? [],
+    };
+
+    if (!user.isVerified) {
+      user.isVerified = true;
+    }
     await user.save();
   }
 

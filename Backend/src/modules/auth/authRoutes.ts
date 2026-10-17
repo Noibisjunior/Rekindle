@@ -38,18 +38,21 @@ r.post("/verify-email", async (req, res) => {
     const accessToken = signAccessToken(user.id);
     const refreshToken = signRefreshToken(user.id);
 
-    res.cookie("accessToken", accessToken, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none", 
+      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
       maxAge: 15 * 60 * 1000,
-    });
-    res.cookie("refreshToken", refreshToken, {
+    };
+    const refreshCookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
       maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
+    };
+
+    res.cookie("accessToken", accessToken, cookieOptions);
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
 
     return res.json({
       message: "Email verified successfully",
@@ -103,8 +106,8 @@ r.post("/refresh", async (req, res) => {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
       maxAge: 15 * 60 * 1000,
     });
 

@@ -93,39 +93,41 @@ export default function EmailSignup({ onContinue }: EmailSignupProps) {
 
   // --- Google Signup ---
   useEffect(() => {
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        callback: async (response: any) => {
-          if (response.credential) {
-            try {
-              const res = await fetch(`${API_BASE}/v1/auth/google`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ idToken: response.credential }),
-              });
-              const data = await res.json();
-              if (!res.ok) throw new Error(data.error || "Google signup failed");
-              onContinue();
-            } catch (err: any) {
-              setErrors({ api: err.message });
-            }
-          }
-        },
-      });
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
+    const googleButton = document.getElementById("google-btn");
 
-      window.google.accounts.id.renderButton(
-        document.getElementById("google-btn"),
-        {
-          theme: "outline",
-          size: "large",
-          width: "100%",
-          text: "signup_with",
-        }
-      );
+    if (!googleClientId || !window.google?.accounts?.id || !googleButton) {
+      return;
     }
-  }, []);
+
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: async (response: any) => {
+        if (response.credential) {
+          try {
+            const res = await fetch(`${API_BASE}/v1/auth/google`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ idToken: response.credential }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Google signup failed");
+            onContinue();
+          } catch (err: any) {
+            setErrors({ api: err.message });
+          }
+        }
+      },
+    });
+
+    window.google.accounts.id.renderButton(googleButton, {
+      theme: "outline",
+      size: "large",
+      width: "100%",
+      text: "signup_with",
+    });
+  }, [onContinue]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { API_BASE } from "../../src/lib/api";
@@ -26,6 +27,7 @@ interface ConnectionsPageProps {
 }
 
 export default function ConnectionsPage({ }: ConnectionsPageProps) {
+  const navigate = useNavigate();
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -139,14 +141,12 @@ export default function ConnectionsPage({ }: ConnectionsPageProps) {
               ) : c.isReceiver ? (
                 <>
                   <span className="text-sm text-green-600">Connection Accepted</span>
-                  <Button onClick={() => (window.location.href = `/connections/${c._id}`)} 
-                  size="sm" variant="outline"> View Details </Button>
+                  <Button onClick={() => navigate(`/connections/${c._id}`)} size="sm" variant="outline"> View Details </Button>
                 </>
               ) : (
                 <>
                   <span className="text-sm text-green-600">Connected</span>
-                  <Button onClick={() => (window.location.href = `/connections/${c._id}`)}
-                  size="sm" variant="outline"> View Details </Button>
+                  <Button onClick={() => navigate(`/connections/${c._id}`)} size="sm" variant="outline"> View Details </Button>
                 </>
               )}
             </div>

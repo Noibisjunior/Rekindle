@@ -58,6 +58,7 @@ function App() {
         <Route path="/connections" element={<ConnectionsPage user={user!} />} />
         <Route path="/my-qrcode" element={<MyQRCodePage />} />
         <Route path="/connections/:id" element={<ConnectionDetailPage />} />
+        <Route path="/u/scan" element={<ScanQRPage />} />
         <Route path="/u/:code" element={<ScanQRPage />} />
 
         {/* REMINDERS */}
@@ -71,7 +72,12 @@ function App() {
 
 function WelcomeScreenWrapper() {
   const navigate = useNavigate();
-  return <WelcomeScreen onGetStarted={() => navigate("/signup")} />;
+  return (
+    <WelcomeScreen
+      onGetStarted={() => navigate("/signup")}
+      onLogin={() => navigate("/login")}
+    />
+  );
 }
 
 function SignupWrapper() {

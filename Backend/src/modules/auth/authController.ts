@@ -30,19 +30,22 @@ export async function login(req: Request, res: Response) {
     const { email, password } = req.body;
     const tokens = await svc.loginLocal(email, password);
 
-    res.cookie("accessToken", tokens.accessToken, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 15 * 60 * 1000, // 15 minutes
-    });
+      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
+      maxAge: 15 * 60 * 1000,
+    };
 
-    res.cookie("refreshToken", tokens.refreshToken, {
+    const refreshCookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    };
+
+    res.cookie("accessToken", tokens.accessToken, cookieOptions);
+    res.cookie("refreshToken", tokens.refreshToken, refreshCookieOptions);
 
     return res.json({ success: true });
   } catch (e: any) {
@@ -65,19 +68,22 @@ export async function google(req: Request, res: Response) {
     const { idToken } = req.body;
     const tokens = await svc.loginWithGoogleIdToken(idToken);
 
-    res.cookie("accessToken", tokens.accessToken, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
       maxAge: 15 * 60 * 1000,
-    });
+    };
 
-    res.cookie("refreshToken", tokens.refreshToken, {
+    const refreshCookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as "none" | "lax",
       maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
+    };
+
+    res.cookie("accessToken", tokens.accessToken, cookieOptions);
+    res.cookie("refreshToken", tokens.refreshToken, refreshCookieOptions);
 
     return res.json({ success: true });
   } catch (e: any) {

@@ -3,8 +3,10 @@ import { verifyAccessToken } from '../utils/jwt';
 import { User } from '../modules/users/userModel';
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
-  // Read JWT from cookies
-  const token = req.cookies?.accessToken;  
+  const bearerToken = req.headers.authorization?.startsWith("Bearer ")
+    ? req.headers.authorization.slice(7)
+    : null;
+  const token = bearerToken || req.cookies?.accessToken;
 
   if (!token) {
     return res.status(401).json({ error: "MissingToken" });

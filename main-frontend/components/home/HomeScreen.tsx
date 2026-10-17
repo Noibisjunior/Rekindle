@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Card, CardContent } from "../ui/card";
@@ -43,6 +44,7 @@ export default function HomeScreen({
   onViewConnections,
   onEditProfile,
 }: HomeScreenProps) {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<ConnectionStats | null>(null);
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -152,7 +154,7 @@ export default function HomeScreen({
         <Card className="bg-gradient-to-r from-secondary to-secondary/80 border-0 shadow-lg">
           <CardContent className="p-4 sm:p-6">
             <Button
-              onClick={() => (window.location.href = "/u/:code")}
+              onClick={() => navigate("/u/scan")}
               className="w-full h-14 sm:h-16 bg-white/20 hover:bg-white/30 border border-white/30 text-secondary-foreground"
             >
               <div className="flex items-center justify-center space-x-2 sm:space-x-3">
@@ -168,7 +170,7 @@ export default function HomeScreen({
         {/* My QR */}
         <Card
           className="border border-border/50 hover:shadow-md transition cursor-pointer"
-          onClick={() => (window.location.href = "/my-qrcode")}
+          onClick={() => navigate("/my-qrcode")}
         >
           <CardContent className="p-4 text-center">
             <div className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary/10 rounded-xl flex items-center justify-center mx-auto mb-3">

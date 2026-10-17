@@ -67,37 +67,43 @@ export default function Login() {
 
   // --- Google Login setup ---
   useEffect(() => {
-    if (window.google && window.google.accounts && window.google.accounts.id) {
-      window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        callback: async (response: any) => {
-          if (response.credential) {
-            setIsGoogleLoading(true);
-            try {
-              const res = await fetch(`${API_BASE}/v1/auth/google`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ idToken: response.credential }),
-              });
-              const data = await res.json();
-              if (!res.ok) throw new Error(data.error || "Google login failed");
-              navigate("/home");
-            } catch (err: any) {
-              setErrors({ api: err.message });
-            } finally {
-              setIsGoogleLoading(false);
-            }
-          }
-        },
-      });
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
+    const googleButton = document.getElementById("google-login-btn");
 
-      // Render Google button into placeholder
-      window.google.accounts.id.renderButton(
-        document.getElementById("google-login-btn"),
-        { theme: "outline", size: "large", width: "100%" }
-      );
+    if (!googleClientId || !window.google?.accounts?.id || !googleButton) {
+      return;
     }
+
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: async (response: any) => {
+        if (response.credential) {
+          setIsGoogleLoading(true);
+          try {
+            const res = await fetch(`${API_BASE}/v1/auth/google`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ idToken: response.credential }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Google login failed");
+            navigate("/home");
+          } catch (err: any) {
+            setErrors({ api: err.message });
+          } finally {
+            setIsGoogleLoading(false);
+          }
+        }
+      },
+    });
+
+    // Render Google button into placeholder
+    window.google.accounts.id.renderButton(googleButton, {
+      theme: "outline",
+      size: "large",
+      width: "100%",
+    });
   }, [navigate]);
 
   return (

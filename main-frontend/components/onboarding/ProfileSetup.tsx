@@ -32,18 +32,38 @@ export default function ProfileSetup() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [photoPreview, setPhotoPreview] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [error, setError] = useState("");
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setPhotoPreview(result);
-      setFormData((prev) => ({ ...prev, photo: result }));
-    };
-    reader.readAsDataURL(file);
+
+    const previewUrl = URL.createObjectURL(file);
+    setPhotoPreview(previewUrl);
+    setError("");
+    setIsUploadingPhoto(true);
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("photo", file);
+
+      const res = await fetch(`${API_BASE}/v1/auth/me/photo`, {
+        method: "POST",
+        credentials: "include",
+        body: formDataToSend,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Photo upload failed");
+
+      const photoUrl = data.photoUrl || data.user?.profile?.photoUrl || "";
+      setFormData((prev) => ({ ...prev, photo: photoUrl }));
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   const toggleTag = (tag: string) => {
@@ -57,16 +77,24 @@ export default function ProfileSetup() {
     setError("");
 
     try {
+      const payload: Record<string, unknown> = {
+        fullName: formData.name,
+        tags: selectedTags,
+      };
+
+      if (formData.linkedin.trim()) {
+        payload.socials = { linkedin: formData.linkedin.trim() };
+      }
+
+      if (formData.photo) {
+        payload.photoUrl = formData.photo;
+      }
+
       const res = await fetch(`${API_BASE}/v1/auth/me`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          fullName: formData.name,
-          linkedin: formData.linkedin,
-          photoUrl: formData.photo,
-          tags: selectedTags,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -92,10 +120,10 @@ export default function ProfileSetup() {
         <Button
           variant="ghost"
           onClick={handleComplete}
-          disabled={!isFormValid || isSaving}
+          disabled={!isFormValid || isSaving || isUploadingPhoto}
           className="text-primary text-sm sm:text-base"
         >
-          {isSaving ? "Saving..." : "Done"}
+          {isSaving ? "Saving..." : isUploadingPhoto ? "Uploading..." : "Done"}
         </Button>
       </div>
 
@@ -186,10 +214,10 @@ export default function ProfileSetup() {
           {/* Save button */}
           <Button
             onClick={handleComplete}
-            disabled={!isFormValid || isSaving}
+            disabled={!isFormValid || isSaving || isUploadingPhoto}
             className="w-full h-11 sm:h-12 text-sm sm:text-base"
           >
-            {isSaving ? "Saving..." : "Complete Profile"}
+            {isSaving ? "Saving..." : isUploadingPhoto ? "Uploading photo..." : "Complete Profile"}
           </Button>
         </div>
       </div>

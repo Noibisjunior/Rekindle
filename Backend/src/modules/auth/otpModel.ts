@@ -13,7 +13,7 @@ const otpSchema = new Schema<IOtp>(
   {
     email: { type: String, required: true, lowercase: true, index: true },
     code: { type: String, required: true },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true },
     verified: { type: Boolean, default: false },
     used: { type: Boolean, default: false }, // prevent reuse
   },
