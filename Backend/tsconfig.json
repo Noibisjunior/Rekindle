@@ -10,7 +10,6 @@
     "skipLibCheck": true,
     "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
     "types": ["node", "jest"]
   },
   "include": ["src", "tests"],
